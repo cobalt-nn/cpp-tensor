@@ -109,13 +109,42 @@ public:
     check_invariants();
   }
 
-  std::string to_string() const{
-    std::string s;
+  std::string to_string(const int indent_size = 2) const{
+    std::string s = "//shape = ";
 
-    std::vector<size_t> sh(shape_.size());
+    for(size_t u:shape_) s += std::to_string(u) + " ";
 
-    
+    s += "\n";
+
+    std::vector<size_t> index(shape_.size(),0);
+
+    size_t dim = 0;
+
+    to_string_recursive(s,index,dim,indent_size);
 
     return s;
+  }
+
+  void to_string_recursive(std::string &s,std::vector<size_t> &index,size_t dim,const int indent_size = 2) const{
+    s += std::string(indent_size * dim,' ') + "{";
+
+    for(size_t i = 0;i < shape_.at(dim);i++){
+      index.at(dim) = i;
+
+      if(dim == shape_.size() - 1){
+        s += " " + std::to_string(at(index)) + " ";
+      }else{
+        s += "\n";
+        to_string_recursive(s,index,dim + 1,indent_size);
+      }
+
+      if(i != shape_.at(dim) - 1) s += ",";
+    }
+
+    if(dim == shape_.size() - 1){
+      s += "}";
+    }else{
+      s += "\n" + std::string(indent_size * dim,' ') + "}";
+    }
   }
 };
