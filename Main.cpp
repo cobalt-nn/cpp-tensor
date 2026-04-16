@@ -8,11 +8,11 @@ int main(){
     data.at(i) = i;
   }
 
-  std::vector<size_t> shape = {5,5,2,2};
+  std::vector<size_t> shape = {10,2,5};
 
   Tensor t(shape,data);
 
-  std::cout << t.to_string() << std::endl;
+  std::cout << t.hadamard(t).to_string() << std::endl;
 
   return 0;
 }

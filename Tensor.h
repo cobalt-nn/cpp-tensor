@@ -95,6 +95,112 @@ public:
     return data_[index];
   }
 
+  const std::vector<size_t>& get_shape() const{
+    return shape_;
+  }
+
+  //参照を返しているため気を付けること
+  std::vector<double>& data(){return data_;};
+  const std::vector<double>& data() const{return data_;}
+
+  //スカラー倍　a * dの結果をoutに入れる
+  static void scale(const Tensor &a,double d,Tensor &out){
+    #ifndef NDEBUG
+    if(a.get_shape() != out.get_shape()) throw std::invalid_argument("Tensor::scale dimension mismatch");
+    #endif
+
+    const double *ad = a.data().data();
+    double *od = out.data().data();
+
+    for(size_t i = 0;i < a.data().size();i++){
+      od[i] = ad[i] * d;
+    }
+  }
+
+  Tensor operator*(double d) const{
+    Tensor out(shape_);
+    scale(*this,d,out);
+    return out;
+  }
+
+  Tensor& operator*=(double d){
+    scale(*this,d,*this);
+    return *this;
+  }
+
+  //要素積
+  static void hadamard(const Tensor &a,const Tensor &b,Tensor &out){
+    #ifndef NDEBUG
+    if(a.get_shape() != out.get_shape() || a.get_shape() != b.get_shape()) throw std::invalid_argument("Tensor::hadamard dimension mismatch");
+    #endif
+
+    const double *ad = a.data().data();
+    const double *bd = b.data().data();
+    double *od = out.data().data();
+
+    for(size_t i = 0;i < a.data().size();i++){
+      od[i] = ad[i] * bd[i];
+    }
+  }
+
+  Tensor hadamard(const Tensor &rhs) const{
+    Tensor out(shape_);
+    hadamard(*this,rhs,out);
+    return out;
+  }
+
+  //a + bの結果をoutに入れる
+  static void add(const Tensor &a,const Tensor &b,Tensor &out){
+    #ifndef NDEBUG
+    if(a.get_shape() != out.get_shape() || a.get_shape() != b.get_shape()) throw std::invalid_argument("Tensor::add dimension mismatch");
+    #endif
+
+    const double *ad = a.data().data();
+    const double *bd = b.data().data();
+    double *od = out.data().data();
+
+    for(size_t i = 0;i < a.data().size();i++){
+      od[i] = ad[i] + bd[i];
+    }
+  }
+
+  Tensor operator+(const Tensor &rhs) const{
+    Tensor out(shape_);
+    add(*this,rhs,out);
+    return out;
+  }
+
+  Tensor& operator+=(const Tensor &rhs){
+    add(*this,rhs,*this);
+    return *this;
+  }
+
+  //a - bの結果をoutに入れる
+  static void subtract(const Tensor &a,const Tensor &b,Tensor &out){
+    #ifndef NDEBUG
+    if(a.get_shape() != out.get_shape() || a.get_shape() != b.get_shape()) throw std::invalid_argument("Tensor::subtract dimension mismatch");
+    #endif
+
+    const double *ad = a.data().data();
+    const double *bd = b.data().data();
+    double *od = out.data().data();
+
+    for(size_t i = 0;i < a.data().size();i++){
+      od[i] = ad[i] - bd[i];
+    }
+  }
+
+  Tensor operator-(const Tensor &rhs) const{
+    Tensor out(shape_);
+    subtract(*this,rhs,out);
+    return out;
+  }
+
+  Tensor& operator-=(const Tensor &rhs){
+    subtract(*this,rhs,*this);
+    return *this;
+  }
+
   //コンストラクタ
   Tensor(const std::vector<size_t> &shape) : shape_(shape),stride_(make_stride()){
     size_t data_size = 1;
